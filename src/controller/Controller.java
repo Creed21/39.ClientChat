@@ -11,15 +11,6 @@ public class Controller {
     private PrintWriter serverWriterOutputStream;
     private BufferedReader keyboard;
 
-    /**
-     * ****** napomena ******
-     *      AKO NA SERVERSKOJ STRANI PORVO INICIJAZIUJETE
-     *
-     *      BufferedReader pa onda PrintWriter
-     *      NA KLIJENTSKOJ STRANI MORA BITI OBRNUTO
-     *
-     *      PrintWriter pa onda BufferedReader
-     */
     public Controller() {
         try {
             this.socket = new Socket(address, port);
@@ -32,20 +23,14 @@ public class Controller {
     }
 
     public void handleCommunication() {
-        sendMsgFromKeyboard();
-        try {
-            String readingStatus = readMsgFromServer();
-            String msgFromServer = readMsgFromServer();
-
-            System.out.println("Server reading status: " + readingStatus);
-            System.out.println("Msg from server: "+ msgFromServer);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        while (true) {
+            sendMsgFromKeyboard(); // in one thread
+            String msgFromServer = readMsgFromServer(); // in another thread
+            System.out.println("Msg from server: " + msgFromServer);
         }
     }
 
-    private String readMsgFromServer() throws IOException {
+    private String readMsgFromServer() {
         try {
             return serverReaderInputStream.readLine();
         } catch (IOException e) {
