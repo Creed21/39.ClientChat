@@ -3,6 +3,7 @@ package controller;
 import java.io.*;
 import java.net.Socket;
 
+@Deprecated
 public class Controller {
     private int port = 3535;
     private String address = "localhost";
@@ -48,7 +49,7 @@ public class Controller {
         }
     }
 
-    private void sendMsg(String message) {
+    public void sendMsg(String message) {
         serverWriterOutputStream.println(message);
         serverWriterOutputStream.flush();
     }

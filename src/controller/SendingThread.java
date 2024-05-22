@@ -27,7 +27,7 @@ public class SendingThread extends Thread {
         }
     }
 
-    private void sendMsg(String message) {
+    public void sendMsg(String message) {
         serverWriterOutputStream.println(message);
         serverWriterOutputStream.flush();
     }

@@ -1,6 +1,7 @@
 import controller.Controller;
 import controller.ReadingThread;
 import controller.SendingThread;
+import gui.ChatApp;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -15,11 +16,13 @@ public class ClientChatApp {
         String address = "localhost";
         Socket socket = new Socket(address, port);
 
-        Thread sendingThread = new SendingThread(socket);
-        Thread readingThread = new ReadingThread(socket);
+        SendingThread sendingThread = new SendingThread(socket);
+        ChatApp chatApp = new ChatApp(sendingThread);
+        ReadingThread readingThread = new ReadingThread(socket, chatApp);
 
         sendingThread.start();
         readingThread.start();
+
 
     }
 
