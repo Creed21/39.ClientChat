@@ -1,22 +1,24 @@
 package gui;
 
+import controller.Controller;
 import controller.ReadingThread;
-import controller.SendingThread;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ChatApp extends JFrame {
+public class ChatForm extends JFrame {
     private JTextArea chatArea;
     private JTextField inputField;
     private JButton sendButton;
+    private Controller controller;
 
-    private SendingThread sendingThread;
 
-    public ChatApp( SendingThread sendingThread) {
-        this.sendingThread = sendingThread;
+    public ChatForm() {
+        this.controller = Controller.getInstance();
+        ReadingThread readingThread = new ReadingThread(controller.getReader(), this);
+        readingThread.start();
 
         // Set up the frame
         setTitle("Chat Application");
@@ -65,9 +67,9 @@ public class ChatApp extends JFrame {
     private void sendMessage() {
         String message = inputField.getText().trim();
         if (!message.isEmpty()) {
-            chatArea.append("You: " + message + "\n");
+            chatArea.append(controller.getUser().getUsername() + ": " + message + "\n");
             inputField.setText("");
-            sendingThread.sendMsg(message);
+            controller.sendChatMsg(message);
         }
     }
 

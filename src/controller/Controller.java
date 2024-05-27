@@ -1,56 +1,82 @@
 package controller;
 
+import model.User;
+
 import java.io.*;
 import java.net.Socket;
 
-@Deprecated
 public class Controller {
-    private int port = 3535;
-    private String address = "localhost";
+
+    private static Controller instance;
+
     private Socket socket;
-    private BufferedReader serverReaderInputStream;
-    private PrintWriter serverWriterOutputStream;
-    private BufferedReader keyboard;
+    private BufferedReader reader;
+    private PrintWriter writer;
+    private boolean running;
+    private User user;
 
-    public Controller() {
+    private Controller() throws IOException {
+        socket = new Socket("localhost", 3535);
+        writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        running = true;
+        System.out.println("connected: " + socket);
+    }
+
+    public static Controller getInstance() {
+        if (instance == null) {
+            try {
+                instance = new Controller();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return instance;
+    }
+
+    public BufferedReader getReader() {
+        return reader;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void login(String action, String username, String password)  {
+        // send request
         try {
-            this.socket = new Socket(address, port);
-            serverWriterOutputStream = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            serverReaderInputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            keyboard = new BufferedReader(new InputStreamReader(System.in));
+            sendMessage("login");
+            sendMessage(username);
+            sendMessage(password);
+
+            user = new User();
+
+            user.setFirstName(reader.readLine());
+            user.setLastName(reader.readLine());
+            user.setUsername(reader.readLine());
+            user.setAdmin(Boolean.parseBoolean(reader.readLine()));
+
+            System.out.println("User: " + user);
+
         } catch (IOException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
+
     }
 
-    public void handleCommunication() {
-        while (true) {
-            sendMsgFromKeyboard(); // in one thread
-            String msgFromServer = readMsgFromServer(); // in another thread
-            System.out.println("Msg from server: " + msgFromServer);
-        }
+    public void sendMessage(String message) {
+        writer.println(message);
+        writer.flush();
     }
 
-    private String readMsgFromServer() {
-        try {
-            return serverReaderInputStream.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public String readMessage() throws IOException {
+        return reader.readLine();
     }
 
-    private void sendMsgFromKeyboard() {
-        try {
-            System.out.print("Enter message for server: ");
-            sendMsg(keyboard.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void sendChatMsg(String message) {
+        sendMessage("sendMsg");
+        sendMessage(message);
     }
 
-    public void sendMsg(String message) {
-        serverWriterOutputStream.println(message);
-        serverWriterOutputStream.flush();
-    }
 }
